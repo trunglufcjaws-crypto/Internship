@@ -7,6 +7,8 @@ Trong quá trình thực tập tại môi trường định hướng Amazon Web 
 
 Hệ thống cho phép người dùng tạo, quản lý và tham gia các sự kiện trực tuyến hoặc trực tiếp; quản lý cộng đồng; gửi thông báo; thống kê lượt tham gia; và tích hợp AI Chatbot nhằm hỗ trợ người dùng tra cứu thông tin sự kiện, giải đáp câu hỏi và nâng cao trải nghiệm.
 
+[trang chủ](images/FirstCloudJourney/home_page.png)
+
 Dự án được thiết kế theo kiến trúc cloud-native, đảm bảo:
 
 - Khả năng mở rộng linh hoạt
