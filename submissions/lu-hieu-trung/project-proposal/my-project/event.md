@@ -26,6 +26,7 @@ Các dịch vụ AWS chính được sử dụng bao gồm: `Amazon S3`, `CloudF
 - [6 – Đánh giá rủi ro](#6-đánh-giá-rủi-ro)
 - [7 – Kết quả mong đợi](#7-kết-quả-mong-đợi)
 
+
 ---
 
 # 1. Mô tả vấn đề
@@ -92,6 +93,7 @@ Vì vậy, việc xây dựng một nền tảng hiện đại, ổn định, b�
 Hệ thống được thiết kế theo mô hình Cloud-native trên nền tảng AWS, áp dụng kiến trúc microservices và container hóa bằng Docker. Toàn bộ quy trình từ phát triển, triển khai đến vận hành được tự động hóa thông qua CI/CD pipeline.
 
 Luồng hoạt động chính của hệ thống bao gồm:
+
 - Luồng CI/CD: Source code được quản lý trên GitHub, sử dụng GitHub Actions để build ứng dụng, đóng gói Docker Image và đẩy lên Amazon ECR/Docker Hub, sau đó cập nhật ECS Task Definition.
 - Luồng người dùng: Người dùng truy cập hệ thống thông qua Route 53, nội dung tĩnh được phân phối bằng CloudFront và S3, các request API được xử lý thông qua API Gateway và Application Load Balancer.
 - Luồng xử lý backend: Các container backend chạy trong Amazon ECS (private subnet), kết nối với cơ sở dữ liệu Amazon RDS và được giám sát bằng CloudWatch.
@@ -99,12 +101,17 @@ Luồng hoạt động chính của hệ thống bao gồm:
 Kiến trúc đảm bảo tính sẵn sàng cao, bảo mật, dễ mở rộng và phù hợp cho các hệ thống hiện đại.
 
 ![Solution-Architecture](/images/FirstCloudJourney/02-Solution-Architecture/Solution-Architecture.jpg)
+_Kiến trúc giải pháp_
 
 ---
 
 ## 2.2. Các dịch vụ AWS sử dụng
 
+![Infrastructure Composer](/images/FirstCloudJourney/02-Solution-Architecture/infrastructure_composer.png)
+_Kiến trúc hạ tầng AWS_
+
 Các dịch vụ AWS chính được sử dụng trong hệ thống bao gồm:
+
 - Amazon Route 53: Quản lý DNS và định tuyến người dùng.
 - Amazon CloudFront: Phân phối nội dung (CDN) cho frontend.
 - Amazon S3: Lưu trữ website tĩnh và tài nguyên frontend.
@@ -126,28 +133,45 @@ Các dịch vụ AWS chính được sử dụng trong hệ thống bao gồm:
 ### 2.3.1 CI/CD Pipeline
 
 Source code được lưu trữ trên GitHub. GitHub Actions tự động thực hiện các bước:
+
 1. Build ứng dụng.
 2. Build Docker Image.
 3. Push image lên Amazon ECR/Docker Hub.
 4. Cập nhật ECS Task Definition và triển khai phiên bản mới.
 
+| ![GitHub Actions workflow Service](/images/FirstCloudJourney/02-Solution-Architecture/gitAction_service.png) | ![GitHub Actions workflow Frontend](/images/FirstCloudJourney/02-Solution-Architecture/gitAction_web.png) |
+| :----------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------: |
+|                           _Hình 1. Code file GitHub Actions workflow cho service_                            |                         _Hình 2. Code file GitHub Actions workflow cho front-end_                         |
+
 ### 2.3.2 Frontend
 
 Frontend được triển khai dưới dạng static website trên Amazon S3 và phân phối thông qua CloudFront nhằm giảm độ trễ và tăng hiệu năng.
 
+![Hình S3:](/images/FirstCloudJourney/02-Solution-Architecture/s3.png)
+
 ### 2.3.3 Backend
 
-Backend được triển khai dưới dạng container trong Amazon ECS, chạy ở private subnet và chỉ nhận traffic từ Application Load Balancer.
+Backend được triển khai dưới dạng container trong Elastic Container Service (Amazon ECS), chạy ở private subnet và chỉ nhận traffic từ Application Load Balancer.
+
+Sử dụng Elastic Container Registry (ECR) chứa các container image được docker push lên.
+
+![Các image được lưu ở ECR](/images/FirstCloudJourney/02-Solution-Architecture/ecr.png)
 
 ### 2.3.4 Database
 
 Amazon RDS được triển khai trong private subnet, chỉ cho phép ECS Service truy cập thông qua Security Group.
+
+[Video tạo database RDS](/video/02-Solution-Architecture/create_rds_eventdb.mp4)
+
+[Video kiểm tra kết nối RDS trên local](/video/02-Solution-Architecture/connect_rds.mp4)
+
 
 ---
 
 ## 2.4. Kiến trúc bảo mật
 
 Hệ thống áp dụng nhiều lớp bảo mật:
+
 - Phân tách public subnet và private subnet.
 - ECS và RDS không có public IP.
 - Security Group giới hạn luồng truy cập giữa các thành phần.
@@ -159,6 +183,7 @@ Hệ thống áp dụng nhiều lớp bảo mật:
 ## 2.5. Thiết kế khả năng mở rộng
 
 Hệ thống hỗ trợ mở rộng linh hoạt:
+
 - ECS Service tự động scale dựa trên CPU và Memory.
 - ALB phân phối đều lưu lượng truy cập.
 - Kiến trúc hỗ trợ triển khai đa Availability Zone.
@@ -167,39 +192,453 @@ Hệ thống hỗ trợ mở rộng linh hoạt:
 ---
 
 # 3. Triển khai kỹ thuật
+
 ## 3.1. Các giai đoạn triển khai
 
 Quá trình triển khai hệ thống được chia thành các giai đoạn rõ ràng nhằm đảm bảo tính đồng bộ và giảm rủi ro trong quá trình phát triển:
 
-#### Giai đoạn 1: Phát triển cục bộ
+### Giai đoạn 1: Phát triển cục bộ
+
 - Hệ thống gồm 4 microservices:
-  - User + Page Service
+  - User Service
   - AI Chat Service
   - Notification Service
   - Event Service
-- Phân công nhân sự:
-  - 01 thành viên phát triển User Service
-  - 01 thành viên phát triển Page Service và AI Chat Service
-  - 01 thành viên phát triển Notification Service và Event Service
 - Toàn bộ các service được phát triển và chạy độc lập trên môi trường local của từng thành viên.
 - Các thành viên thực hiện demo chéo để kiểm tra logic và luồng xử lý.
 
-#### Giai đoạn 2: Tích hợp hệ thống
+Cấu trúc microservice có 4 service tương ứng với 4 docker image
+
+- Các file GitHub Actions workflow cho 4 service:
+  - [file cấu hình chatbot-service](https://github.com/Heahaidu/interest-project/blob/main/.github/workflows/deploy-chatbot-service.yml)
+  - [file cấu hình user-service](https://github.com/Heahaidu/interest-project/blob/main/.github/workflows/deploy-user-service.yml)
+  - [file cấu hình event-service](https://github.com/Heahaidu/interest-project/blob/main/.github/workflows/deploy-event-service.yml)
+  - [file cấu hình notification-service](https://github.com/Heahaidu/interest-project/blob/main/.github/workflows/deploy-notification-service.yml)
+
+> [!INFO]
+> Mục đích của file GitHub Actions workflow là **tự động build**, _push_ **Docker image** và _deploy_ các **service** lên `AWS ECS` mỗi khi push code
+
+- File GitHub Actions workflow cầu hình frontend: [file cấu hình web (front-end)](https://github.com/Heahaidu/interest-project/blob/main/.github/workflows/deploy-web-app.yml)
+
+> [!INFO]
+> Mục đích của file GitHub Actions workflow là **tự động build**, _push_ **Docker image** và _deploy_ **front-end lên static** lên `AWS S3` +  `CloudFront` mỗi khi push code
+
+
+### Giai đoạn 2: Tích hợp hệ thống
+
 - Sau khi hoàn thành từng service, source code được gom về một máy để:
   - Chạy đồng thời toàn bộ backend services.
   - Kết nối với frontend dùng chung.
   - Kiểm thử luồng nghiệp vụ tổng thể trên môi trường local.
 
-#### Giai đoạn 3: Triển khai thủ công lên AWS
+### Giai đoạn 3: Triển khai thủ công lên AWS
+
 - Các service backend được đóng gói bằng Docker.
 - Triển khai thủ công lên AWS (ECS, RDS, ALB).
 - Cấu hình mạng, environment variables và security group.
 - Kiểm thử hệ thống trên môi trường cloud.
 
-#### Giai đoạn 4: Tự động hóa triển khai
+#### Demo quá trình build & deploy Docker image
+
+| macOS / Linux | Windows |
+|--------------|---------|
+| ![ECR macOS/Linux](/images/FirstCloudJourney/03-Technical-Implementation/ecr_os_linux.jpg) | ![ECR Windows](/images/FirstCloudJourney/03-Technical-Implementation/ecr_win.jpg) |
+
+
+**Thực hiện lệnh build docker cho Service:**
+```yaml 
+docker build -t {ServiceName} .
+```
+- {ServiceName} : Tên service phía backend (vd: chat-bot)
+
+**Thực hiện lệnh docker push cho Service:**
+
+**Bước 1:** AWS CLI lấy authorization token tạm thời từ ECR
+```bash
+aws ecr get-login-password --region {Region} | docker login --username AWS --password-stdin {AccountID}.dkr.ecr.{Region}.amazonaws.com  
+```
+- {Region} : AWS Region chứa ECR (vd: us-east-1)
+- {AccountID} : AWS Account ID (12 chữ số)
+- {AccountID}.dkr.ecr.{Region}.amazonaws.com : Domain của Amazon Elastic Container Registry (ECR)
+
+Token được truyền an toàn sang Docker
+
+Docker đăng nhập vào AWS ECR
+
+Cho phép docker push / docker pull
+
+**Bước 2:** Gắn tag cho Docker image trước khi push lên Amazon ECR.
+```yaml 
+docker tag {ServiceName}:{TagName} {AccountID}.dkr.ecr.{Region}.amazonaws.com/{RepositoryNanme}:{TagName}
+```
+- {TagName} : Tag của image trên ECR (vd: latest)
+- {RepositoryNanme} : Tên repository trong ECR (vd: interest-chatbot-service)
+- {AccountID}.dkr.ecr.{Region}.amazonaws.com/{RepositoryNanme}:{TagName}  : URL của Docker image trong ECR
+
+**Bước 3:** Push image lên AWS ECR
+```yaml 
+docker push {AccountID}.dkr.ecr.{Region}.amazonaws.com/{RepositoryNanme}:{TagName}
+```
+#### Chatbot Service – Docker Build & Push
+
+![Chatbot – Docker build](/images/FirstCloudJourney/03-Technical-Implementation/chatbot/docker_build_chatbot.jpg)
+*Hình 1. Build Docker image cho Chatbot Service*
+
+![Chatbot – Push to ECR](/images/FirstCloudJourney/03-Technical-Implementation/chatbot/docker_push_chatbot.jpg)
+*Hình 2. Push Docker image Chatbot Service lên Amazon ECR*
+
+![Chatbot – Image](/images/FirstCloudJourney/03-Technical-Implementation/chatbot/image_chatbot.jpg)
+*Hình 3. Image Chatbot Service được tạo thành công*
+
+#### Triển khai các dịch vụ cơ bản trên AWS
+
+**Mạng**
+
+Tạo VPC, subnet, route table, internet gateway và nat gateway
+- 4 subnet gồm: 2 subnet private và subnet public ở 2 Availability Zones
+- Subnet public ở các Availability Zones sẽ được đi đến RouteTable và đi ra Internet Gateway
+- Subnet private sẽ được kết nối tới RouteTable và hướng đến NAT Gateway
+
+![vpc](/images/FirstCloudJourney/03-Technical-Implementation/vpc.png)
+![igw](../../../../static/images/FirstCloudJourney/03-Technical-Implementation/igw.png)
+
+| NAT Gateway ở AZ a | NAT Gateway ở AZ B |
+|-------|-------|
+| ![natA](/images/FirstCloudJourney/03-Technical-Implementation/natA.png) | ![natB](/images/FirstCloudJourney/03-Technical-Implementation/natB.png) |
+
+
+**S3 Buckets**
+
+Tạo S3 lưu trữ frontend và lưu giữ các hình ảnh:
+
+![s3](/images/FirstCloudJourney/03-Technical-Implementation/s3.png)
+
+**RDS**
+
+Tạo RDS để lưu trữ dữ liệu. Có nhiều database để phục vụ cho cấu trúc microservice.
+
+![rds](/images/FirstCloudJourney/03-Technical-Implementation/rds.png)
+
+**Application Load Balancer**
+
+công dụng của ALB (Application Load Balancer) là làm cổng vào duy nhất cho backend, nhận toàn bộ HTTP request từ Internet (hoặc từ API Gateway qua VPC Link), sau đó định tuyến request theo path (ví dụ /api/v1/user, /api/v1/events, /ws-chat) đến đúng ECS Fargate service tương ứng thông qua các Target Group. ALB đồng thời chia tải giữa các task ECS, health check để loại bỏ task lỗi, giúp hệ thống high availability trên 2 AZ, và cách ly bảo mật bằng cách chỉ cho ECS nhận traffic đi qua ALB, không expose trực tiếp ra Internet.
+
+![abl](/images/FirstCloudJourney/03-Technical-Implementation/listenALB.png)
+
+![listenAndRule](/images/FirstCloudJourney/03-Technical-Implementation/http.png)
+
+**CloudFront**
+
+CloudFront được dùng làm CDN (Content Delivery Network) đứng trước S3 WebBucket để phân phối nội dung frontend (website) ra toàn cầu với độ trễ thấp, tăng tốc độ tải trang và giảm tải trực tiếp cho S3, đồng thời tăng cường bảo mật bằng cách không cho S3 public mà chỉ cho CloudFront truy cập thông qua cơ chế kiểm soát truy cập (OAC/OAI). Origins trong CloudFront xác định nguồn gốc nội dung, ở đây chính là S3 WebBucket (và có thể mở rộng thêm origin ALB/API nếu cần), từ đó CloudFront sẽ lấy dữ liệu gốc để cache và phân phối cho người dùng. Behaviors (cache behaviors) quy định cách CloudFront xử lý từng loại request dựa trên path pattern, bao gồm việc request nào được cache, phương thức HTTP nào được phép, có forward headers/cookies/query string hay không và TTL bao lâu; nhờ đó có thể tách rõ nội dung tĩnh (HTML/CSS/JS) được cache mạnh và nội dung động/API không cache hoặc cache rất ngắn, giúp hệ thống vừa nhanh vừa đúng chức năng.
+
+![cloudfront](/images/FirstCloudJourney/03-Technical-Implementation/origins.png)
+
+![behavior](/images/FirstCloudJourney/03-Technical-Implementation/behavior.png)
+
+### Giai đoạn 4: Tự động hóa triển khai
+
 - Sử dụng AWS CloudFormation để mô tả hạ tầng dưới dạng mã (Infrastructure as Code).
 - Chuẩn hóa quá trình deploy.
 - Giảm lỗi cấu hình thủ công và tăng khả năng tái sử dụng.
+  
+[file template CloudFormation](https://github.com/Heahaidu/interest-project/blob/main/infra.json)
+
+---
+
+🎬 **CloudFormation Demo Video**  
+▶️ [Watch the demo](/video/03-Technical-Implementation/CloudFormation.mp4)
+
+---
+
+#### Các bước triển khai CloudFormation trên AWS
+**Bước 1:** Chọn Create Stack 
+> Vào CloudFormation và Chọn Stack → Ấn Create Stack
+
+![create_stack](/images/FirstCloudJourney/03-Technical-Implementation/cloud_formation/create_stack.png)
+
+**Bước 2:** Chọn file cấu hình CloudFormation có sẵn
+> Chọn "Choose an existing template" và "Upload a template file". Rồi ấn chọn "Choose file" → Next
+
+![import_file](/images/FirstCloudJourney/03-Technical-Implementation/cloud_formation/import_file.png)
+
+**Bước 3:** Chờ CloudFormation tạo hoàn tất các dịch vụ
+> Chờ từ 10 đến 20 phút
+
+![wait](/images/FirstCloudJourney/03-Technical-Implementation/cloud_formation/wait.png)
+
+Kết quả sau khi triển khai thành công
+
+![result](/images/FirstCloudJourney/03-Technical-Implementation/cloud_formation/result.png)
+
+---
+
+### Tổng quan
+
+_Internet_
+
+├── CloudFront → S3 WebBucket (frontend SPA)
+
+└── API Gateway HTTP API →  VPC Link → ALB → 4 ECS Fargate Services
+
+------├── User Service → RDS Db1
+
+------├── Notification Service → RDS Db2
+
+------├── Chatbot Service → RDS Db2
+
+------└── Event Service → RDS Db3
+
+------└── All services → Redis & Kafka (internal DNS)
+
+
+#### Parameters (Tham số đầu vào)
+```yaml
+"Parameters": {
+  "ProjectName": { "Type": "String", "Default": "interest-project" },
+  "VpcCidr": { "Type": "String", "Default": "10.0.0.0/16" },
+  "PublicSubnet1Cidr": { ... },
+  ...
+  "DbPassword": { "Type": "String", "NoEcho": true, ... },
+  "ServiceAImage": { "Type": "String", "Default": "AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/interest-user-service" },
+  ...
+},
+```
+Đây là các tham số người dùng có thể thay đổi khi tạo stack.
+- ProjectName: tên dự án dùng để đặt tên tài nguyên.
+- CIDR blocks cho VPC và các subnet.
+- Tên bucket S3, GitHub repo/branch cho CI/CD.
+- Thông tin database (username, password, instance class).
+- Tên và image ECR cho 4 microservices.
+- Đường dẫn API cho từng service và các thông số scaling.
+
+#### Mạng 
+**VPC**
+```yaml
+"Vpc": {
+  "Type": "AWS::EC2::VPC",
+  "Properties": {
+    "CidrBlock": { "Ref": "VpcCidr" },
+    "EnableDnsHostnames": true,
+    "EnableDnsSupport": true,
+    "Tags": [{ "Key": "Name", "Value": { "Fn::Sub": "${ProjectName}-vpc" } }]
+  }
+},
+```
+Tạo một VPC riêng với dải IP 10.0.0.0/16, bật DNS hostname và support để các service trong VPC có thể resolve tên miền nội bộ.
+
+**Public & Private Subnets (2 AZs)**:
+`PublicSubnet1`, `PublicSubnet2`, `PrivateSubnet1`, `PrivateSubnet2`
+- 2 public subnets (10.0.0.0/24 và 10.0.1.0/24) ở 2 Availability Zones khác nhau → đặt ALB và NAT Gateway.
+- 2 private subnets (10.0.10.0/24 và 10.0.11.0/24) → đặt ECS Fargate tasks, RDS, Redis, Kafka (không có public IP).
+
+**Internet Gateway + NAT Gateways**:
+`InternetGateway`, `AttachIgw`, `NatEip1`, `NatEip2`, `NatGateway1`, `NatGateway2`
+- Public subnets có route ra Internet qua Internet Gateway.
+- Private subnets có route ra Internet qua 2 NAT Gateway (mỗi AZ một cái) → đảm bảo high availability và các task trong private subnet vẫn có thể pull image từ ECR, truy cập Internet.
+
+#### S3 Buckets
+**ImagesBucket (lưu ảnh người dùng upload)**
+```yaml
+"ImagesBucket": { ... },
+"ImagesBucketPolicy": { ... },
+```
+- Bucket công khai (public read) để lưu trữ ảnh.
+- CORS cho phép PUT/GET từ bất kỳ origin nào.
+- Dùng cho upload ảnh trực tiếp từ client hoặc từ backend.
+
+**WebBucket (lưu static web app – frontend)**
+```yaml
+"WebBucket": { ... },
+"WebBucketPolicy": { ... }, (sau này gắn với CloudFront)
+```
+- Bucket private hoàn toàn.
+- Chỉ CloudFront mới được đọc → dùng làm origin cho CloudFront distribution (SPA React/Vue/...).
+
+#### IAM Roles
+**EcsTaskRole**: `EcsTaskRole`  
+```yaml
+"EcsTaskRole": {
+  "Type": "AWS::IAM::Role",
+  "Properties": { ... }
+},
+```
+- Role mà các ECS task assume để upload ảnh lên ImagesBucket (PutObject, ListBucket...).
+
+**GitHubDeployRole (GitHub OIDC)**: `GitHubOidcProvider`, `GitHubDeployRole`  
+```yaml
+"GitHubOidcProvider": {
+  "Type": "AWS::IAM::OIDCProvider",
+  "Properties": { ... }
+},
+"GitHubDeployRole": {
+  "Type": "AWS::IAM::Role",
+  "Properties": { ... }
+}, 
+```
+- Tạo OIDC provider cho GitHub Actions.
+- Role cho phép GitHub Actions (chỉ từ branch main của repo cụ thể):
+  - Push image lên ECR (4 repositories).
+  - Deploy frontend lên WebBucket S3 + invalidate CloudFront.
+  - Update ECS services.
+
+**EcsExecutionRole**: 
+```yaml
+"EcsExecutionRole": {
+  "Type": "AWS::IAM::Role",
+  "Properties": { ... }
+},
+```
+Role chuẩn để ECS pull image từ ECR và gửi log CloudWatch.
+
+#### RDS PostgreSQL
+```yaml
+"Db1": {
+  "Type": "AWS::RDS::DBInstance",
+  "Properties": {
+    "Engine": "postgres",
+    "DBInstanceIdentifier": { "Fn::Sub": "${ProjectName}-db1" },
+    ...
+  }
+},
+"Db2": { ... },
+"Db3": { ... },
+```
+Tạo 3 RDS PostgreSQL riêng biệt (mỗi service dùng một DB riêng → isolation tốt):
+- `Db1`: dùng cho service user
+- `Db2`: dùng cho service notification và chatbot
+- `Db3`: dùng cho service event
+
+Đặt trong private subnets
+
+Security Group chỉ cho phép kết nối từ ECS tasks (port 5432)
+
+#### ALB + ECS Fargate
+**Security Groups**
+- `AlbSecurityGroup`: cho phép HTTP (80) từ Internet + từ API Gateway VPC Link.
+- `EcsSecurityGroup`: chỉ cho phép traffic từ ALB vào port 8080.
+
+**ALB & Listener Rules**:`Alb`, `AlbListenerHttp`, `TargetGroupA/B/C/D`, `RuleA/B/C/D`
+
+```yaml
+"Alb": {
+  "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+  "Properties": { ... }
+},
+"AlbListenerHttp": {
+  "Type": "AWS::ElasticLoadBalancingV2::Listener",
+  "Properties": { ... }
+},
+"TargetGroupA": {
+  "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+  "Properties": { ... }
+},
+"TargetGroupB": { ... },
+"TargetGroupC": { ... },   
+"TargetGroupD": { ... }, 
+
+"RuleA": {
+  "Type": "AWS::ElasticLoadBalancingV2::ListenerRule",
+  "Properties": { ... }
+},
+"RuleB": { ... },
+"RuleC": { ... },
+"RuleD": { ... },
+``` 
+- ALB internet-facing, lắng nghe HTTP port 80.
+- 4 target groups (IP type) cho 4 services.
+- 4 listener rules dựa trên path:
+  - /api/v1/user/* → service user
+  - /api/v1/notifications/* → service notification
+  - /ws-chat/websocket/* và /api/v1/chatbot/* → service chatbot
+  - /api/v1/events/* → service event
+
+**ECS Cluster & Services**: `EcsCluster`, `ServiceA`, `ServiceB`, `ServiceC`, `ServiceD`
+
+```yaml
+"EcsCluster": {
+  "Type": "AWS::ECS::Cluster",
+  "Properties": { "ClusterName": { "Fn::Sub": "${ProjectName}-cluster" } }
+},
+"ServiceA": {
+  "Type": "AWS::ECS::Service",
+  "DependsOn": ["AlbListenerHttp", "RuleA"],
+  "Properties": { ... }
+},
+"ServiceB": { ... },
+"ServiceC": { ... },
+"ServiceD": { ... },
+```
+- Các task chạy trên Fargate, trong private subnets.
+- Mỗi service có auto-scaling dựa trên CPU (target 60%).
+
+####  API Gateway HTTP API + VPC Link
+`HttpApi`, `VpcLink`, `ApiIntegrationToAlb`, `ApiRouteAny`
+
+```yaml
+"HttpApi": {
+  "Type": "AWS::ApiGatewayV2::Api",
+  "Properties": { ... }
+},
+"VpcLink": {
+  "Type": "AWS::ApiGatewayV2::VpcLink",
+  "Properties": { ... }
+},    
+"ApiIntegrationToAlb": {
+  "Type": "AWS::ApiGatewayV2::Integration",
+  "Properties": { ... }
+},
+"ApiRouteAny": {
+  "Type": "AWS::ApiGatewayV2::Route",
+  "Properties": { ... }
+},
+```
+- Tạo HTTP API (API Gateway v2) với route `ANY /{proxy+}` → proxy toàn bộ request vào ALB qua VPC Link.
+- Ưu điểm: có custom domain dễ dàng, monitoring tốt hơn ALB trực tiếp, có thể thêm auth sau này.
+- VPC Link đặt trong private subnet, có security group riêng.
+
+#### CloudFront + S3 Static Website : 
+`WebDistribution`, `WebOac`, `WebBucketPolicy`
+
+```yaml
+"WebDistribution": {
+  "Type": "AWS::CloudFront::Distribution",
+  "Properties": {
+    "DistributionConfig": { ... }
+  }
+},
+"WebOac": {
+  "Type": "AWS::CloudFront::OriginAccessControl",
+  "Properties": { ... }
+},    
+"WebBucketPolicy": {
+  "Type": "AWS::S3::BucketPolicy",
+  "Properties": {
+    "Bucket": { "Ref": "WebBucket" },
+    "PolicyDocument": { ... }
+  }
+},
+```
+- CloudFront distribution trỏ vào WebBucket (origin S3).
+- Dùng OAC (Origin Access Control) hiện đại → bucket hoàn toàn private.
+- Xử lý SPA: 403/404 → trả về index.html.
+- Redirect HTTP → HTTPS.
+
+#### Outputs (Kết quả sau khi deploy)
+```yaml
+"Outputs": {
+  "AlbDnsName",
+  "HttpApiEndpoint",
+  "CloudFrontDomain",
+  "Db1Endpoint", "Db2Endpoint", "Db3Endpoint",
+  "RedisEndpoint",
+  "KafkaBootstrap",
+  ...
+}
+```
+Sau khi deploy xong, sẽ thấy:
+- URL API Gateway (nên gắn custom domain).
+- URL CloudFront cho frontend.
+- Endpoint các DB, Redis, Kafka để cấu hình ứng dụng nếu cần.
 
 ---
 
@@ -207,7 +646,7 @@ Quá trình triển khai hệ thống được chia thành các giai đoạn rõ
 
 - Ngôn ngữ & Framework:
   - Backend: Java Spring Boot (microservices)
-  - Frontend: ReactJS (dùng chung cho toàn hệ thống)
+  - Frontend: Next.js (React-based framework) (dùng chung cho toàn hệ thống)
 - Công nghệ:
   - Docker & Docker Compose
   - RESTful API
@@ -226,6 +665,7 @@ Quá trình triển khai hệ thống được chia thành các giai đoạn rõ
 ## 3.3. Phương pháp phát triển
 
 Hệ thống được phát triển theo phương pháp:
+
 - **Microservices Architecture**: Mỗi service đảm nhiệm một nghiệp vụ riêng biệt.
 - **Phát triển song song**: Các thành viên làm việc độc lập trên từng service.
 - **Incremental Development**: Hoàn thiện từng chức năng nhỏ và kiểm thử liên tục.
@@ -256,18 +696,21 @@ Chiến lược kiểm thử được áp dụng theo nhiều mức:
 
 Kế hoạch triển khai được thực hiện theo hai bước:
 
-#### Triển khai thủ công
+### 3.5.1 Triển khai thủ công
+
 - Build Docker Image tại local.
 - Push image lên Amazon ECR.
 - Tạo ECS Task Definition và ECS Service thủ công.
 - Kiểm tra hệ thống hoạt động ổn định.
 
-#### Triển khai tự động
+### 3.5.2 Triển khai tự động
+
 - Sử dụng CloudFormation để khởi tạo hạ tầng.
 - Kết hợp CI/CD pipeline để:
   - Build và push image tự động.
   - Cập nhật ECS Service khi có thay đổi code.
 - Đảm bảo triển khai nhanh, nhất quán và dễ rollback.
+
 
 ---
 
