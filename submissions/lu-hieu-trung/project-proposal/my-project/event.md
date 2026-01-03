@@ -859,7 +859,7 @@ Cách phân bổ này giúp tối ưu hiệu quả làm việc và đảm bảo 
 
 ---
 
-### 👉 Tổng chi phí hạ tầng ước tính
+### Tổng chi phí hạ tầng ước tính
 
 > [!WARNING]  
 > Tổng chi phí có thể tăng nếu:
@@ -872,9 +872,78 @@ Cách phân bổ này giúp tối ưu hiệu quả làm việc và đảm bảo 
 
 ---
 
+## Phần này là tài liệu này tổng hợp **link định giá chính thức của AWS** cho toàn bộ dịch vụ được sử dụng trong kiến trúc CloudFormation (VPC + ECS Fargate + ALB + API Gateway + RDS + S3 + CloudFront).
+
+---
+
+| STT | AWS Service | Mục đích trong kiến trúc | Link chi phí chính thức |
+|----:|-------------|--------------------------|--------------------------|
+| 1 | Amazon VPC và NAT Gateway | VPC, Subnet, Route Table, Internet Gateway. Internet access cho private subnet | https://aws.amazon.com/vpc/pricing/ |
+| 2 | Elastic IP | Gán cho NAT Gateway | https://aws.amazon.com/ec2/pricing/on-demand/ |
+| 3 | Amazon S3 (WebBucket, ImagesBucket) | Lưu frontend web & images | https://aws.amazon.com/s3/pricing/ |
+| 4 | AWS IAM (Free) | Role, Policy, GitHub OIDC | https://aws.amazon.com/iam/pricing/ |
+| 5 | Amazon ECR | Lưu container images | https://aws.amazon.com/ecr/pricing/ |
+| 6 | Amazon ECS | Orchestrate container services | https://aws.amazon.com/ecs/pricing/ |
+| 7 | AWS Fargate | Chạy container (CPU + RAM) | https://aws.amazon.com/fargate/pricing/ |
+| 8 | Application Load Balancer (ALB) | Load balancing & path routing | https://aws.amazon.com/elasticloadbalancing/pricing/ |
+| 9 | Amazon API Gateway (HTTP API) và API Gateway VPC Link | Public API entrypoint. Kết nối API Gateway → ALB | https://aws.amazon.com/api-gateway/pricing/ |
+| 10 | Amazon RDS (PostgreSQL) | Database cho microservices | https://aws.amazon.com/rds/postgresql/pricing/ |
+| 11 | Amazon CloudWatch Logs | Lưu log ECS & ALB | https://aws.amazon.com/cloudwatch/pricing/ |
+| 12 | AWS Cloud Map | Service Discovery (Redis, Kafka) | https://aws.amazon.com/cloud-map/pricing/ |
+| 13 | Amazon CloudFront | CDN phân phối frontend | https://aws.amazon.com/cloudfront/pricing/ |
+| 14 | Application Auto Scaling (Free) | Auto scale ECS services | https://aws.amazon.com/application-autoscaling/pricing/ |
+| 15 | AWS Pricing Calculator | Ước tính tổng chi phí | https://calculator.aws/ |
+
+
+> [!NOTE]
+> ### Networking (VPC, Subnet, Route, IGW) & NAT Gateway
+> - VPC, Subnet, Route Table, Internet Gateway: **miễn phí**
+> - Chỉ tính phí: **NAT Gateway, VPC Endpoint, Data Transfer**
+>
+> ### Amazon ECS & AWS Fargate
+> - Amazon ECS: **Control plane miễn phí**
+> - AWS Fargate: **CPU + Memory + Storage**
+> - Áp dụng cho:
+>   - Service A / B / C / D
+>   - Redis Service
+>   - Kafka Service
+>
+> ### Application Load Balancer (ALB)
+> - Tính theo:
+>   - Giờ chạy Load Balancer
+>   - LCU (Load Capacity Unit)
+>
+> ### Amazon RDS for PostgreSQL
+> - Tính theo:
+>   - DB instance
+>   - Storage
+>   - Backup
+>   - Multi-AZ (nếu bật)
+>
+> ### AWS Pricing Calculator
+> - Dùng để ước tính tổng chi phí hàng tháng cho:
+>   - ECS Fargate
+>   - RDS
+>   - ALB
+>   - NAT Gateway
+>   - API Gateway
+>   - S3 & CloudFront
+
+---
+
+> [!IMPORTANT]
+> **Lưu ý quan trọng về chi phí AWS**
+> - Các dịch vụ tiêu tốn chi phí lớn nhất:
+>   1. NAT Gateway
+>   2. ECS Fargate
+>   3. Amazon RDS
+>   4. ALB và Data Transfer
+> - Giá dịch vụ **phụ thuộc region**
+
+---
+
 ## 5.2. Chi phí phát triển (Development Cost)
 
-  
 > Do dự án được thực hiện bởi sinh viên, chi phí phát triển chủ yếu là thời gian và công sức học tập. 
 > Việc sử dụng công cụ mã nguồn mở và cloud free-tier giúp giảm đáng kể chi phí phát triển ban đầu.
 
