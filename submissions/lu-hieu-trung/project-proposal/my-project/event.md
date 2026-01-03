@@ -107,7 +107,7 @@ _Kiến trúc giải pháp_
 
 ## 2.2. Các dịch vụ AWS sử dụng
 
-![Infrastructure Composer](/images/FirstCloudJourney/02-Solution-Architecture/infrastructure_composer.png)
+![Infrastructure Composer](images/FirstCloudJourney/02-Solution-Architecture/infrastructure_composer.png)
 _Kiến trúc hạ tầng AWS_
 
 Các dịch vụ AWS chính được sử dụng trong hệ thống bao gồm:
@@ -139,7 +139,7 @@ Source code được lưu trữ trên GitHub. GitHub Actions tự động thực
 3. Push image lên Amazon ECR/Docker Hub.
 4. Cập nhật ECS Task Definition và triển khai phiên bản mới.
 
-| ![GitHub Actions workflow Service](/images/FirstCloudJourney/02-Solution-Architecture/gitAction_service.png) | ![GitHub Actions workflow Frontend](/images/FirstCloudJourney/02-Solution-Architecture/gitAction_web.png) |
+| ![GitHub Actions workflow Service](images/FirstCloudJourney/02-Solution-Architecture/gitAction_service.png) | ![GitHub Actions workflow Frontend](images/FirstCloudJourney/02-Solution-Architecture/gitAction_web.png) |
 | :----------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------: |
 |                           _Hình 1. Code file GitHub Actions workflow cho service_                            |                         _Hình 2. Code file GitHub Actions workflow cho front-end_                         |
 
@@ -147,7 +147,7 @@ Source code được lưu trữ trên GitHub. GitHub Actions tự động thực
 
 Frontend được triển khai dưới dạng static website trên Amazon S3 và phân phối thông qua CloudFront nhằm giảm độ trễ và tăng hiệu năng.
 
-![Hình S3:](/images/FirstCloudJourney/02-Solution-Architecture/s3.png)
+![Hình S3:](images/FirstCloudJourney/02-Solution-Architecture/s3.png)
 
 ### 2.3.3 Backend
 
@@ -155,15 +155,15 @@ Backend được triển khai dưới dạng container trong Elastic Container S
 
 Sử dụng Elastic Container Registry (ECR) chứa các container image được docker push lên.
 
-![Các image được lưu ở ECR](/images/FirstCloudJourney/02-Solution-Architecture/ecr.png)
+![Các image được lưu ở ECR](images/FirstCloudJourney/02-Solution-Architecture/ecr.png)
 
 ### 2.3.4 Database
 
 Amazon RDS được triển khai trong private subnet, chỉ cho phép ECS Service truy cập thông qua Security Group.
 
-[Video tạo database RDS](/video/02-Solution-Architecture/create_rds_eventdb.mp4)
+[Video tạo database RDS](video/02-Solution-Architecture/create_rds_eventdb.mp4)
 
-[Video kiểm tra kết nối RDS trên local](/video/02-Solution-Architecture/connect_rds.mp4)
+[Video kiểm tra kết nối RDS trên local](video/02-Solution-Architecture/connect_rds.mp4)
 
 
 ---
@@ -242,7 +242,7 @@ Cấu trúc microservice có 4 service tương ứng với 4 docker image
 
 | macOS / Linux | Windows |
 |--------------|---------|
-| ![ECR macOS/Linux](/images/FirstCloudJourney/03-Technical-Implementation/ecr_os_linux.jpg) | ![ECR Windows](/images/FirstCloudJourney/03-Technical-Implementation/ecr_win.jpg) |
+| ![ECR macOS/Linux](images/FirstCloudJourney/03-Technical-Implementation/ecr_os_linux.jpg) | ![ECR Windows](images/FirstCloudJourney/03-Technical-Implementation/ecr_win.jpg) |
 
 
 **Thực hiện lệnh build docker cho Service:**
@@ -281,13 +281,13 @@ docker push {AccountID}.dkr.ecr.{Region}.amazonaws.com/{RepositoryNanme}:{TagNam
 ```
 #### Chatbot Service – Docker Build & Push
 
-![Chatbot – Docker build](/images/FirstCloudJourney/03-Technical-Implementation/chatbot/docker_build_chatbot.jpg)
+![Chatbot – Docker build](images/FirstCloudJourney/03-Technical-Implementation/chatbot/docker_build_chatbot.jpg)
 *Hình 1. Build Docker image cho Chatbot Service*
 
-![Chatbot – Push to ECR](/images/FirstCloudJourney/03-Technical-Implementation/chatbot/docker_push_chatbot.jpg)
+![Chatbot – Push to ECR](images/FirstCloudJourney/03-Technical-Implementation/chatbot/docker_push_chatbot.jpg)
 *Hình 2. Push Docker image Chatbot Service lên Amazon ECR*
 
-![Chatbot – Image](/images/FirstCloudJourney/03-Technical-Implementation/chatbot/image_chatbot.jpg)
+![Chatbot – Image](images/FirstCloudJourney/03-Technical-Implementation/chatbot/image_chatbot.jpg)
 *Hình 3. Image Chatbot Service được tạo thành công*
 
 #### Triển khai các dịch vụ cơ bản trên AWS
@@ -299,41 +299,41 @@ Tạo VPC, subnet, route table, internet gateway và nat gateway
 - Subnet public ở các Availability Zones sẽ được đi đến RouteTable và đi ra Internet Gateway
 - Subnet private sẽ được kết nối tới RouteTable và hướng đến NAT Gateway
 
-![vpc](/images/FirstCloudJourney/03-Technical-Implementation/vpc.png)
-![igw](../../../../static/images/FirstCloudJourney/03-Technical-Implementation/igw.png)
+![vpc](images/FirstCloudJourney/03-Technical-Implementation/vpc.png)
+![igw](images/FirstCloudJourney/03-Technical-Implementation/igw.png)
 
 | NAT Gateway ở AZ a | NAT Gateway ở AZ B |
 |-------|-------|
-| ![natA](/images/FirstCloudJourney/03-Technical-Implementation/natA.png) | ![natB](/images/FirstCloudJourney/03-Technical-Implementation/natB.png) |
+| ![natA](images/FirstCloudJourney/03-Technical-Implementation/natA.png) | ![natB](images/FirstCloudJourney/03-Technical-Implementation/natB.png) |
 
 
 **S3 Buckets**
 
 Tạo S3 lưu trữ frontend và lưu giữ các hình ảnh:
 
-![s3](/images/FirstCloudJourney/03-Technical-Implementation/s3.png)
+![s3](images/FirstCloudJourney/03-Technical-Implementation/s3.png)
 
 **RDS**
 
 Tạo RDS để lưu trữ dữ liệu. Có nhiều database để phục vụ cho cấu trúc microservice.
 
-![rds](/images/FirstCloudJourney/03-Technical-Implementation/rds.png)
+![rds](images/FirstCloudJourney/03-Technical-Implementation/rds.png)
 
 **Application Load Balancer**
 
 công dụng của ALB (Application Load Balancer) là làm cổng vào duy nhất cho backend, nhận toàn bộ HTTP request từ Internet (hoặc từ API Gateway qua VPC Link), sau đó định tuyến request theo path (ví dụ /api/v1/user, /api/v1/events, /ws-chat) đến đúng ECS Fargate service tương ứng thông qua các Target Group. ALB đồng thời chia tải giữa các task ECS, health check để loại bỏ task lỗi, giúp hệ thống high availability trên 2 AZ, và cách ly bảo mật bằng cách chỉ cho ECS nhận traffic đi qua ALB, không expose trực tiếp ra Internet.
 
-![abl](/images/FirstCloudJourney/03-Technical-Implementation/listenALB.png)
+![abl](images/FirstCloudJourney/03-Technical-Implementation/listenALB.png)
 
-![listenAndRule](/images/FirstCloudJourney/03-Technical-Implementation/http.png)
+![listenAndRule](images/FirstCloudJourney/03-Technical-Implementation/http.png)
 
 **CloudFront**
 
 CloudFront được dùng làm CDN (Content Delivery Network) đứng trước S3 WebBucket để phân phối nội dung frontend (website) ra toàn cầu với độ trễ thấp, tăng tốc độ tải trang và giảm tải trực tiếp cho S3, đồng thời tăng cường bảo mật bằng cách không cho S3 public mà chỉ cho CloudFront truy cập thông qua cơ chế kiểm soát truy cập (OAC/OAI). Origins trong CloudFront xác định nguồn gốc nội dung, ở đây chính là S3 WebBucket (và có thể mở rộng thêm origin ALB/API nếu cần), từ đó CloudFront sẽ lấy dữ liệu gốc để cache và phân phối cho người dùng. Behaviors (cache behaviors) quy định cách CloudFront xử lý từng loại request dựa trên path pattern, bao gồm việc request nào được cache, phương thức HTTP nào được phép, có forward headers/cookies/query string hay không và TTL bao lâu; nhờ đó có thể tách rõ nội dung tĩnh (HTML/CSS/JS) được cache mạnh và nội dung động/API không cache hoặc cache rất ngắn, giúp hệ thống vừa nhanh vừa đúng chức năng.
 
-![cloudfront](/images/FirstCloudJourney/03-Technical-Implementation/origins.png)
+![cloudfront](images/FirstCloudJourney/03-Technical-Implementation/origins.png)
 
-![behavior](/images/FirstCloudJourney/03-Technical-Implementation/behavior.png)
+![behavior](images/FirstCloudJourney/03-Technical-Implementation/behavior.png)
 
 ### Giai đoạn 4: Tự động hóa triển khai
 
@@ -346,7 +346,7 @@ CloudFront được dùng làm CDN (Content Delivery Network) đứng trước S
 ---
 
 🎬 **CloudFormation Demo Video**  
-▶️ [Watch the demo](/video/03-Technical-Implementation/CloudFormation.mp4)
+▶️ [Watch the demo](video/03-Technical-Implementation/CloudFormation.mp4)
 
 ---
 
@@ -354,21 +354,21 @@ CloudFront được dùng làm CDN (Content Delivery Network) đứng trước S
 **Bước 1:** Chọn Create Stack 
 > Vào CloudFormation và Chọn Stack → Ấn Create Stack
 
-![create_stack](/images/FirstCloudJourney/03-Technical-Implementation/cloud_formation/create_stack.png)
+![create_stack](images/FirstCloudJourney/03-Technical-Implementation/cloud_formation/create_stack.png)
 
 **Bước 2:** Chọn file cấu hình CloudFormation có sẵn
 > Chọn "Choose an existing template" và "Upload a template file". Rồi ấn chọn "Choose file" → Next
 
-![import_file](/images/FirstCloudJourney/03-Technical-Implementation/cloud_formation/import_file.png)
+![import_file](images/FirstCloudJourney/03-Technical-Implementation/cloud_formation/import_file.png)
 
 **Bước 3:** Chờ CloudFormation tạo hoàn tất các dịch vụ
 > Chờ từ 10 đến 20 phút
 
-![wait](/images/FirstCloudJourney/03-Technical-Implementation/cloud_formation/wait.png)
+![wait](images/FirstCloudJourney/03-Technical-Implementation/cloud_formation/wait.png)
 
 Kết quả sau khi triển khai thành công
 
-![result](/images/FirstCloudJourney/03-Technical-Implementation/cloud_formation/result.png)
+![result](images/FirstCloudJourney/03-Technical-Implementation/cloud_formation/result.png)
 
 ---
 
