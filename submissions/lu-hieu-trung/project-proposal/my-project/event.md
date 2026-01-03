@@ -100,7 +100,7 @@ Luồng hoạt động chính của hệ thống bao gồm:
 
 Kiến trúc đảm bảo tính sẵn sàng cao, bảo mật, dễ mở rộng và phù hợp cho các hệ thống hiện đại.
 
-![Solution-Architecture](/images/FirstCloudJourney/02-Solution-Architecture/Solution-Architecture.jpg)
+![Solution-Architecture](images/FirstCloudJourney/02-Solution-Architecture/Solution-Architecture.jpg)
 _Kiến trúc giải pháp_
 
 ---
