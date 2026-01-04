@@ -28,7 +28,6 @@ Các dịch vụ AWS chính được sử dụng bao gồm: `Amazon S3`, `CloudF
 - [6 – Đánh giá rủi ro](#6-đánh-giá-rủi-ro)
 - [7 – Kết quả mong đợi](#7-kết-quả-mong-đợi)
 
-
 ---
 
 # 1. Mô tả vấn đề
@@ -103,6 +102,7 @@ Luồng hoạt động chính của hệ thống bao gồm:
 Kiến trúc đảm bảo tính sẵn sàng cao, bảo mật, dễ mở rộng và phù hợp cho các hệ thống hiện đại.
 
 ![Solution-Architecture](images/FirstCloudJourney/02-Solution-Architecture/Solution-Architecture.jpg)
+
 _Kiến trúc giải pháp_
 
 ---
@@ -110,6 +110,7 @@ _Kiến trúc giải pháp_
 ## 2.2. Các dịch vụ AWS sử dụng
 
 ![Infrastructure Composer](images/FirstCloudJourney/02-Solution-Architecture/infrastructure_composer.png)
+
 _Kiến trúc hạ tầng AWS_
 
 Các dịch vụ AWS chính được sử dụng trong hệ thống bao gồm:
